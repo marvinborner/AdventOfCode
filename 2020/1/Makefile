@@ -1,10 +1,10 @@
-.PHONY: run.cs
+.PHONY: solve.cs
 
-run.exe: run.cs
+solve.exe: solve.cs
 	@mcs $+
 
 clean:
-	@rm -f run.exe
+	@rm -f solve.exe
 
-run: run.exe
-	@mono run.exe
+run: solve.exe
+	@mono $+
