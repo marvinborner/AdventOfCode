@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 int part_one(FILE *fp)
 {
@@ -12,13 +11,13 @@ int part_one(FILE *fp)
 	while (getline(&line, &len, fp) != -1) {
 		int low, high, cnt = 0;
 		char ch;
-		char str[256];
+		char str[42];
 		sscanf(line, "%d-%d %c: %s\n", &low, &high, &ch, &str[0]);
-		for (int i = 0; i < strlen(str); i++) {
-			if (str[i] == ch) {
+
+		for (char *p = str; *p; p++)
+			if (*p == ch)
 				cnt++;
-			}
-		}
+
 		if (cnt >= low && cnt <= high)
 			res++;
 	}
