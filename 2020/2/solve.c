@@ -3,19 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-int part_one()
+int part_one(FILE *fp)
 {
-	FILE *fp = fopen("input", "r");
-	if (!fp)
-		exit(EXIT_FAILURE);
-
 	int res = 0;
 
 	char *line = NULL;
 	size_t len = 0;
-	ssize_t read = 0;
-	while ((read = getline(&line, &len, fp)) != -1) {
-		(void)read;
+	while (getline(&line, &len, fp) != -1) {
 		int low, high, cnt = 0;
 		char ch;
 		char str[256];
@@ -29,24 +23,16 @@ int part_one()
 			res++;
 	}
 
-	fclose(fp);
-
 	return res;
 }
 
-int part_two()
+int part_two(FILE *fp)
 {
-	FILE *fp = fopen("input", "r");
-	if (!fp)
-		exit(EXIT_FAILURE);
-
 	int res = 0;
 
 	char *line = NULL;
 	size_t len = 0;
-	ssize_t read = 0;
-	while ((read = getline(&line, &len, fp)) != -1) {
-		(void)read;
+	while (getline(&line, &len, fp) != -1) {
 		int low, high, cnt = 0;
 		char ch, first, second;
 		char str[256];
@@ -57,14 +43,19 @@ int part_two()
 			res++;
 	}
 
-	fclose(fp);
-
 	return res;
 }
 
 int main(int argc, char *argv[])
 {
-	printf("%d\n", part_one());
-	printf("%d\n", part_two());
+	FILE *fp = fopen("input", "r");
+	if (!fp)
+		exit(EXIT_FAILURE);
+
+	printf("%d\n", part_one(fp));
+	rewind(fp);
+	printf("%d\n", part_two(fp));
+
+	fclose(fp);
 	return 0;
 }
