@@ -20,16 +20,17 @@ int part_one(int *data)
 	return one * three;
 }
 
+#define COND(i, o) ((i) + (o) < LENGTH && *(cur + (o)) - *cur <= 3)
 long part_two(int *data)
 {
-	long a, b, c;
-	a = 1;
-	b = 0;
-	c = 0;
-	for (int i = LENGTH - 2; i > 0; i--) {
-		long next = (i + 1 < LENGTH && data[i + 1] - data[i] <= 3 ? a : 0) +
-			    (i + 2 < LENGTH && data[i + 2] - data[i] <= 3 ? b : 0) +
-			    (i + 3 < LENGTH && data[i + 3] - data[i] <= 3 ? c : 0);
+	long a = 1;
+	long b = 0;
+	long c = 0;
+
+	int *cur = &data[LENGTH - 1];
+	while (cur-- != &data[0]) {
+		int i = cur - data;
+		long next = (COND(i, 1) ? a : 0) + (COND(i, 2) ? b : 0) + (COND(i, 3) ? c : 0);
 		c = b;
 		b = a;
 		a = next;
@@ -56,7 +57,7 @@ int *to_int(FILE *fp, int *arr)
 	int d = 0, i = 0;
 	while (fscanf(fp, "%d\n", &d) != EOF)
 		arr[i++] = d;
-	LENGTH = i + 2;
+	LENGTH = i + 1;
 
 	return arr;
 }
@@ -70,7 +71,6 @@ int main()
 	int data[128] = { 0 };
 	to_int(fp, data);
 	qsort(data, LENGTH, sizeof(int), cmp);
-	data[LENGTH] = data[LENGTH - 1] + 3;
 
 	printf("%d\n", part_one(data));
 	printf("%lu\n", part_two(data));
