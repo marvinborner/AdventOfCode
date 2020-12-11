@@ -1,7 +1,7 @@
 .PHONY: solve.c
 
 solve.o: solve.c
-	@gcc $+ -o $@ -lm
+	@gcc -Ofast $+ -o $@ -lm
 
 clean:
 	@rm -f *.o
