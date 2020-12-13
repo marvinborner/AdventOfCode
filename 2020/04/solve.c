@@ -1,8 +1,8 @@
-#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 void normalize(char *data)
 {
@@ -146,10 +146,13 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	char buf[SIZE] = { 0 };
 	fread(buf, SIZE, 1, fp);
-	normalize(buf);
 
+	clock_t tic = clock();
+	normalize(buf);
 	printf("%d\n", part_one(buf));
 	printf("%d\n", part_two(buf));
+	clock_t toc = clock();
+	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
 	fclose(fp);
 	return 0;

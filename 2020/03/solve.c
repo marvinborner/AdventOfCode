@@ -1,6 +1,6 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 int part_one(FILE *fp)
 {
@@ -48,9 +48,12 @@ int main(int argc, char *argv[])
 	if (!fp)
 		exit(EXIT_FAILURE);
 
+	clock_t tic = clock();
 	printf("%d\n", part_one(fp));
 	rewind(fp);
 	printf("%u\n", part_two(fp));
+	clock_t toc = clock();
+	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
 	fclose(fp);
 	return 0;

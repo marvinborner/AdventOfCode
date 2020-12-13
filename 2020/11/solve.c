@@ -1,8 +1,8 @@
-#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define SIZE 10000
 #define X_MAX 99
@@ -201,8 +201,11 @@ int main(int argc, char *argv[])
 	char buf[SIZE] = { 0 };
 	fread(buf, SIZE, 1, fp);
 
+	clock_t tic = clock();
 	printf("%d\n", part_one(buf));
 	printf("%d\n", part_two(buf));
+	clock_t toc = clock();
+	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
 	fclose(fp);
 	return 0;

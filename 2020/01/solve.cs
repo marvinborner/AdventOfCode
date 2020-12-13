@@ -49,11 +49,14 @@ namespace AOC
             string text = File.ReadAllText("input");
             string[] numsStr = text.Split('\n');
             numsStr[numsStr.Length - 1] = "2020"; // Some weird newline character ig
+            var clock = System.Diagnostics.Stopwatch.StartNew();
             int[] nums = Array.ConvertAll(numsStr, int.Parse).OrderBy(i => i).ToArray();
             int[] d = Double(nums, 0, 2020);
             int[] t = Triple(nums, 2020);
             Console.WriteLine(d[0] * d[1]);
             Console.WriteLine(t[0] * t[1] * t[2]);
+            clock.Stop();
+            Console.WriteLine("TIME: " + ((float)clock.ElapsedMilliseconds / 1000.0).ToString("n6") + " seconds");
         }
     }
 }

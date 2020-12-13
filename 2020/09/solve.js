@@ -1,3 +1,4 @@
+const { _, performance } = require("perf_hooks");
 const fs = require("fs");
 const data = fs
   .readFileSync("input", "utf8")
@@ -40,6 +41,9 @@ function partTwo(num) {
   }
 }
 
+const tic = performance.now();
 const num = partOne();
 console.log(num);
 console.log(partTwo(num));
+const toc = performance.now();
+console.log("TIME: " + ((toc - tic) / 1000).toFixed(6) + " seconds");

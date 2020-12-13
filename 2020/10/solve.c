@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 static int LENGTH = 0;
 
@@ -72,8 +73,11 @@ int main()
 	to_int(fp, data);
 	qsort(data, LENGTH, sizeof(int), cmp);
 
+	clock_t tic = clock();
 	printf("%d\n", part_one(data));
 	printf("%lu\n", part_two(data));
+	clock_t toc = clock();
+	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
 	fclose(fp);
 	return 0;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define COUNT 1024
 #define FIRST 100
@@ -95,8 +96,11 @@ int main(int argc, char *argv[])
 	if (!fp)
 		exit(EXIT_FAILURE);
 
+	clock_t tic = clock();
 	printf("%d\n", part_one(fp));
 	printf("%d\n", part_two());
+	clock_t toc = clock();
+	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
 	fclose(fp);
 	return 0;
