@@ -35,11 +35,38 @@ int part_one(char *data)
 	}
 }
 
-int part_two(char *data)
+long part_two(char *data)
 {
-	int res = 0;
+	int note_line = 0, note_service_index = 0;
+	int note_in_service[128] = { 0 };
+	for (char *p = data; *p; p++) {
+		if (*p == '\n') {
+			note_line++;
+			continue;
+		}
 
-	return res;
+		if (note_line == 1) {
+			if (*p == 'x') {
+				note_in_service[note_service_index] = 0;
+				p += 1;
+			} else {
+				sscanf(p, "%d,", &note_in_service[note_service_index]);
+				p += (int)(floor(log10(note_in_service[note_service_index])) + 1);
+			}
+			note_service_index++;
+		}
+	}
+
+	long pos = 0, offset = 1;
+	for (int *bus = note_in_service; bus - note_in_service < note_service_index; bus++) {
+		if (!*bus)
+			continue;
+		while ((pos + (bus - note_in_service)) % *bus)
+			pos += offset;
+		offset *= *bus;
+	}
+
+	return pos;
 }
 
 #define SIZE 20000
@@ -52,7 +79,7 @@ int main(int argc, char *argv[])
 	fread(buf, SIZE, 1, fp);
 
 	printf("%d\n", part_one(buf));
-	printf("%d\n", part_two(buf));
+	printf("%lu\n", part_two(buf));
 
 	fclose(fp);
 	return 0;
