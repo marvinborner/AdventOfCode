@@ -13,6 +13,7 @@ struct mem_map {
 	struct mem_entry *tail;
 };
 
+// THIS FUNCTION IS THE SPEED PROBLEM!
 struct mem_entry *get_entry(struct mem_map *mem_map, int address)
 {
 	if (!mem_map || !mem_map->head || !mem_map->tail)
@@ -29,7 +30,6 @@ struct mem_entry *get_entry(struct mem_map *mem_map, int address)
 
 void new_entry(struct mem_map *mem_map, long address, long value)
 {
-	/* printf("%lu: %lu\n", address, value); */
 	if (!mem_map)
 		return;
 
@@ -111,7 +111,7 @@ long part_two(FILE *fp)
 			int floating = 0;
 			for (int i = 0; i < 36; i++) {
 				if (mask[i] == '1') {
-					address |= 1L << (36 - i - 1);
+					address |= 1ul << (36 - i - 1);
 				} else if (mask[i] == 'X') {
 					floating_bits[floating] = i;
 					floating++;
@@ -121,11 +121,9 @@ long part_two(FILE *fp)
 			long masked_addr = address;
 			for (long perm = 0; perm < (1 << floating); ++perm) {
 				long address = masked_addr;
-				for (int j = 0; j < floating; ++j) {
-					if (perm & (1L << j)) {
-						address ^= (1L << (36 - floating_bits[j] - 1));
-					}
-				}
+				for (int j = 0; j < floating; j++)
+					if (perm & (1ul << j))
+						address ^= (1ul << (36 - floating_bits[j] - 1));
 				new_entry(&mem_map, address, value);
 			}
 		}
