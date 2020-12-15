@@ -26,7 +26,7 @@ int add(struct num **nums, int index, int num)
 	return diff;
 }
 
-int calc(FILE *fp, int count)
+void calc(FILE *fp)
 {
 	struct num *nums = NULL;
 
@@ -34,10 +34,13 @@ int calc(FILE *fp, int count)
 	while (fscanf(fp, "%d,", &num) == 1)
 		num = add(&nums, index++, num);
 
-	while (index < count)
+	while (index < 2020)
 		num = add(&nums, index++, num);
+	printf("%d\n", num);
 
-	return num;
+	while (index < 30000000)
+		num = add(&nums, index++, num);
+	printf("%d\n", num);
 }
 
 int main(int argc, char *argv[])
@@ -47,9 +50,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 
 	clock_t tic = clock();
-	printf("%d\n", calc(fp, 2020));
-	rewind(fp);
-	printf("%d\n", calc(fp, 30000000));
+	calc(fp);
 	clock_t toc = clock();
 	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
