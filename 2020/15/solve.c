@@ -1,29 +1,43 @@
+#include "../../lib/uthash.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#define MAX_NUMS 30000000
+struct num {
+	int num;
+	int index;
+	UT_hash_handle hh;
+};
 
-static int nums[MAX_NUMS] = { 0 };
-
-int part_one(FILE *fp, int count)
+int add(struct num **nums, int index, int num)
 {
-	long size = 0;
-	while (size < count)
-		if (fscanf(fp, "%d,", &nums[size++]) != 1)
-			break;
-
-	for (int i = size - 2; i < count - 1; i++) {
-		for (int j = i - 1; j >= 0; j--) {
-			if (nums[j] == nums[i]) {
-				nums[i + 1] = i - j;
-				break;
-			}
-		}
+	struct num *n;
+	HASH_FIND_INT(*nums, &num, n);
+	if (!n) {
+		n = malloc(sizeof(*n));
+		n->index = index;
+		n->num = num;
+		HASH_ADD_INT(*nums, num, n);
+		return 0;
 	}
+	int diff = index - n->index;
+	n->index = index;
+	return diff;
+}
 
-	return nums[count - 1];
+int calc(FILE *fp, int count)
+{
+	struct num *nums = NULL;
+
+	int num, index = 1;
+	while (fscanf(fp, "%d,", &num) == 1)
+		num = add(&nums, index++, num);
+
+	while (index < count)
+		num = add(&nums, index++, num);
+
+	return num;
 }
 
 int main(int argc, char *argv[])
@@ -33,10 +47,9 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 
 	clock_t tic = clock();
-	printf("%d\n", part_one(fp, 2020));
-	memset(nums, 0, 2020);
+	printf("%d\n", calc(fp, 2020));
 	rewind(fp);
-	printf("%d\n", part_one(fp, 30000000));
+	printf("%d\n", calc(fp, 30000000));
 	clock_t toc = clock();
 	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 

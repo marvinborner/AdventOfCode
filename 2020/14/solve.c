@@ -1,70 +1,24 @@
+#include "../../lib/uthash.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-struct mem_entry {
+struct mem {
 	long address;
 	long value;
-	struct mem_entry *next;
+	UT_hash_handle hh;
 };
 
-struct mem_map {
-	struct mem_entry *head;
-	struct mem_entry *tail;
-};
-
-// THIS FUNCTION IS THE SPEED PROBLEM!
-struct mem_entry *get_entry(struct mem_map *mem_map, int address)
+void new_entry(struct mem **mem, long address, long value)
 {
-	if (!mem_map || !mem_map->head || !mem_map->tail)
-		return NULL;
-
-	struct mem_entry *iterator = mem_map->head;
-	while (iterator) {
-		if (iterator->address == address)
-			return iterator;
-		iterator = iterator->next;
+	struct mem *addr;
+	HASH_FIND(hh, *mem, &address, sizeof(address), addr);
+	if (addr == NULL) {
+		addr = malloc(sizeof(*addr));
+		addr->address = address;
+		HASH_ADD(hh, *mem, address, sizeof(address), addr);
 	}
-	return NULL;
-}
-
-void new_entry(struct mem_map *mem_map, long address, long value)
-{
-	if (!mem_map)
-		return;
-
-	struct mem_entry *override = NULL;
-	if ((override = get_entry(mem_map, address))) {
-		override->value = value;
-		return;
-	}
-
-	struct mem_entry *new = malloc(sizeof(*new));
-	new->address = address;
-	new->value = value;
-	new->next = NULL;
-
-	if (mem_map->head && mem_map->tail) {
-		mem_map->tail->next = new;
-		mem_map->tail = new;
-	} else {
-		mem_map->head = new;
-		mem_map->tail = mem_map->head;
-	}
-}
-
-long count_doku(struct mem_map *mem_map)
-{
-	if (!mem_map || !mem_map->head || !mem_map->tail)
-		return 0;
-
-	long cnt = 0;
-	struct mem_entry *iterator = mem_map->head;
-	while (iterator) {
-		cnt += iterator->value;
-		iterator = iterator->next;
-	}
-	return cnt;
+	addr->value = value;
 }
 
 long part_one(FILE *fp)
@@ -72,7 +26,7 @@ long part_one(FILE *fp)
 	char *line = NULL;
 	size_t len = 0;
 	char mask[36] = { 0 };
-	struct mem_map mem_map = { 0 };
+	struct mem *mem = NULL;
 	while (getline(&line, &len, fp) != -1) {
 		if (line[0] == 'm' && line[1] == 'a') {
 			sscanf(line, "mask = %s\n", &mask[0]);
@@ -87,11 +41,20 @@ long part_one(FILE *fp)
 				else if (*p == '1')
 					value |= shift;
 			}
-			new_entry(&mem_map, address, value);
+			new_entry(&mem, address, value);
 		}
 	}
 
-	return count_doku(&mem_map);
+	long sum = 0;
+	struct mem *addr, *tmp;
+	HASH_ITER(hh, mem, addr, tmp)
+	{
+		sum += addr->value;
+		HASH_DEL(mem, addr);
+		free(addr);
+	}
+
+	return sum;
 }
 
 long part_two(FILE *fp)
@@ -100,7 +63,7 @@ long part_two(FILE *fp)
 	size_t len = 0;
 	char mask[36] = { 0 };
 	int floating_bits[64];
-	struct mem_map mem_map = { 0 };
+	struct mem *mem = NULL;
 	while (getline(&line, &len, fp) != -1) {
 		if (line[0] == 'm' && line[1] == 'a') {
 			sscanf(line, "mask = %s\n", &mask[0]);
@@ -124,12 +87,20 @@ long part_two(FILE *fp)
 				for (int j = 0; j < floating; j++)
 					if (perm & (1ul << j))
 						address ^= (1ul << (36 - floating_bits[j] - 1));
-				new_entry(&mem_map, address, value);
+				new_entry(&mem, address, value);
 			}
 		}
 	}
 
-	return count_doku(&mem_map);
+	long sum = 0;
+	struct mem *addr, *tmp;
+	HASH_ITER(hh, mem, addr, tmp)
+	{
+		sum += addr->value;
+		HASH_DEL(mem, addr);
+		free(addr);
+	}
+	return sum;
 }
 
 int main(int argc, char *argv[])
