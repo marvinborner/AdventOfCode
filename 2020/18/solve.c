@@ -46,15 +46,15 @@ long evil(char *str)
 	return res;
 }
 
-int part_one(FILE *fp)
+long part_one(FILE *fp)
 {
-	int res = 0;
+	long res = 0;
 
 	char *line = NULL;
 	size_t len;
 	while (getline(&line, &len, fp) != -1) {
-		int a = evil(line);
-		printf("%d\n", a);
+		long a = evil(line);
+		printf("%lu\n", a);
 		res += a;
 	}
 
