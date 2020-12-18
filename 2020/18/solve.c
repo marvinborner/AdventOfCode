@@ -13,7 +13,7 @@ long add_or_mul(long *res, int num, int mul)
 	return *res;
 }
 
-long evil(char *str)
+long evil(char *str, int prec)
 {
 	long res = 0;
 	int mul = 0, skip = 0, brace_cnt = 0;
@@ -31,7 +31,7 @@ long evil(char *str)
 		if (*p == ' ') {
 			continue;
 		} else if (*p == '(') {
-			add_or_mul(&res, evil(p + 1), mul);
+			add_or_mul(&res, evil(p + 1, prec), mul);
 			skip = 1;
 		} else if (*p == ')') {
 			break; // That's why I don't use switch..case
@@ -52,18 +52,20 @@ long part_one(FILE *fp)
 
 	char *line = NULL;
 	size_t len;
-	while (getline(&line, &len, fp) != -1) {
-		long a = evil(line);
-		printf("%lu\n", a);
-		res += a;
-	}
+	while (getline(&line, &len, fp) != -1)
+		res += evil(line, 0);
 
 	return res;
 }
 
-int part_two(FILE *fp)
+long part_two(FILE *fp)
 {
-	int res = 0;
+	long res = 0;
+
+	char *line = NULL;
+	size_t len;
+	while (getline(&line, &len, fp) != -1)
+		res += evil(line, 1);
 
 	return res;
 }
