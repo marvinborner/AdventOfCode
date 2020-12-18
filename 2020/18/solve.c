@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 
-long add_or_mul(long *res, int num, int mul)
+long add_or_mul(long *res, long num, int mul)
 {
 	if (mul == 0)
 		*res += num;
@@ -36,6 +36,8 @@ long evil(char *str, int prec)
 		} else if (*p == ')') {
 			break; // That's why I don't use switch..case
 		} else if (*p == '*') {
+			if (prec)
+				return add_or_mul(&res, evil(p + 1, prec), 1);
 			mul = 1;
 		} else if (*p == '+') {
 			mul = 0;
