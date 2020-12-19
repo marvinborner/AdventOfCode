@@ -9,36 +9,36 @@ static char rules[256][256] = { 0 };
 static int ind = 0;
 int verify(char *inp, char *rule)
 {
-	//printf("%d: %s\n", ind, rule);
 	char ch;
 	int num1, num2, num3, num4;
 	if (sscanf(rule, "%d %d | %d %d", &num1, &num2, &num3, &num4) == 4) {
 		int i = ind;
 		if ((verify(inp, rules[num1]) && verify(inp, rules[num2])) ||
-		    ((ind = i) && verify(inp, rules[num3]) && verify(inp, rules[num4])))
-			return ind;
-		else {
-			ind = i;
-			return 0;
-		}
-	} else if (sscanf(rule, "%d", &num1) == 1) {
-		int i = ind;
-		if (verify(inp, rules[num1])) {
+		    ((ind = i), verify(inp, rules[num3]) && verify(inp, rules[num4]))) {
 			return ind;
 		} else {
-			ind = i;
+			return 0;
+		}
+	} else if (sscanf(rule, "%d | %d", &num1, &num2) == 2) {
+		int i = ind;
+		if (verify(inp, rules[num1]) || ((ind = i), verify(inp, rules[num2]))) {
+			return ind;
+		} else {
 			return 0;
 		}
 	} else if (sscanf(rule, "%d %d", &num1, &num2) == 2) {
-		int i = ind;
 		if (verify(inp, rules[num1]) && verify(inp, rules[num2])) {
 			return ind;
 		} else {
-			ind = i;
+			return 0;
+		}
+	} else if (sscanf(rule, "%d", &num1) == 1) {
+		if (verify(inp, rules[num1])) {
+			return ind;
+		} else {
 			return 0;
 		}
 	} else if (sscanf(rule, "\"%c\"", &ch) == 1) {
-		/* printf("%c %c\n", ch, inp[ind]); */
 		return ch == inp[ind] ? ++ind : 0;
 	} else {
 		printf("PANIC: %s, %s\n", inp, rule);
@@ -55,6 +55,7 @@ long part_one(FILE *fp)
 	int paragraph = 0;
 	char *line = NULL;
 	size_t len;
+	int i = 0;
 	while (getline(&line, &len, fp) != -1) {
 		if (line[0] == '\n') {
 			paragraph++;
