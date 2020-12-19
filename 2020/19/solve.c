@@ -110,7 +110,12 @@ long part_two(FILE *fp)
 			char rule[64] = { 0 };
 			int ind = 0;
 			sscanf(line, "%d: %64[0-9a-z \"|]", &ind, rule);
-			strcpy(rules[ind], rule);
+			if (ind == 8)
+				strcpy(rules[8], "42 | 42 8");
+			else if (ind == 11)
+				strcpy(rules[11], "42 31 | 42 11 31");
+			else
+				strcpy(rules[ind], rule);
 		} else if (paragraph == 1) {
 			ind = 0;
 			if (verify(line, rules[0]) == strlen(line) - 1)
@@ -123,20 +128,17 @@ long part_two(FILE *fp)
 
 int main(int argc, char *argv[])
 {
-	FILE *fp1 = fopen("input1", "r");
-	if (!fp1)
-		exit(EXIT_FAILURE);
-	FILE *fp2 = fopen("input2", "r");
-	if (!fp2)
+	FILE *fp = fopen("input", "r");
+	if (!fp)
 		exit(EXIT_FAILURE);
 
 	clock_t tic = clock();
-	printf("%lu\n", part_one(fp1));
-	printf("%lu\n", part_two(fp2));
+	printf("%lu\n", part_one(fp));
+	rewind(fp);
+	printf("%lu\n", part_two(fp));
 	clock_t toc = clock();
 	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
-	fclose(fp1);
-	fclose(fp2);
+	fclose(fp);
 	return 0;
 }

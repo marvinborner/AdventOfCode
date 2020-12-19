@@ -6,5 +6,8 @@ solve.o: solve.c
 clean:
 	@rm -f *.o
 
-run: solve.o
+run:
+	@node solve.js
+
+c: solve.o
 	@./solve.o
