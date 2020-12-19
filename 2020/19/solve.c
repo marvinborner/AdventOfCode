@@ -4,22 +4,45 @@
 #include <string.h>
 #include <time.h>
 
-static char rules[256][64] = { 0 };
+static char rules[256][256] = { 0 };
 
-int check_rule(char *inp, char *rule, int index)
+static int ind = 0;
+int verify(char *inp, char *rule)
 {
+	//printf("%d: %s\n", ind, rule);
 	char ch;
 	int num1, num2, num3, num4;
 	if (sscanf(rule, "%d %d | %d %d", &num1, &num2, &num3, &num4) == 4) {
-		return (check_rule(inp, rules[num1], index) &&
-			check_rule(inp, rules[num2], index + 1)) ||
-		       (check_rule(inp, rules[num3], index) &&
-			check_rule(inp, rules[num4], index + 1));
+		int i = ind;
+		if ((verify(inp, rules[num1]) && verify(inp, rules[num2])) ||
+		    ((ind = i) && verify(inp, rules[num3]) && verify(inp, rules[num4])))
+			return ind;
+		else {
+			ind = i;
+			return 0;
+		}
+	} else if (sscanf(rule, "%d", &num1) == 1) {
+		int i = ind;
+		if (verify(inp, rules[num1])) {
+			return ind;
+		} else {
+			ind = i;
+			return 0;
+		}
 	} else if (sscanf(rule, "%d %d", &num1, &num2) == 2) {
-		return check_rule(inp, rules[num1], index) &&
-		       check_rule(inp, rules[num2], index + 1);
+		int i = ind;
+		if (verify(inp, rules[num1]) && verify(inp, rules[num2])) {
+			return ind;
+		} else {
+			ind = i;
+			return 0;
+		}
 	} else if (sscanf(rule, "\"%c\"", &ch) == 1) {
-		return ch == inp[index];
+		/* printf("%c %c\n", ch, inp[ind]); */
+		return ch == inp[ind] ? ++ind : 0;
+	} else {
+		printf("PANIC: %s, %s\n", inp, rule);
+		exit(0);
 	}
 
 	return 0;
@@ -44,7 +67,8 @@ long part_one(FILE *fp)
 			sscanf(line, "%d: %64[0-9a-z \"|]", &ind, rule);
 			strcpy(rules[ind], rule);
 		} else if (paragraph == 1) {
-			if (check_rule(line, rules[0], 0))
+			ind = 0;
+			if (verify(line, rules[0]) == strlen(line) - 1)
 				res++;
 		}
 	}
