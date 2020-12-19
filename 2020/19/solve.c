@@ -1,4 +1,3 @@
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,15 +5,33 @@
 
 static char rules[256][256] = { 0 };
 
+// Who cares about code repetition? :P
 static int ind = 0;
 int verify(char *inp, char *rule)
 {
 	char ch;
-	int num1, num2, num3, num4;
-	if (sscanf(rule, "%d %d | %d %d", &num1, &num2, &num3, &num4) == 4) {
+	int num1, num2, num3, num4, num5;
+	if (sscanf(rule, "%d %d | %d %d %d", &num1, &num2, &num3, &num4, &num5) == 5) {
+		int i = ind;
+		if ((verify(inp, rules[num1]) && verify(inp, rules[num2])) ||
+		    ((ind = i), verify(inp, rules[num3]) && verify(inp, rules[num4]) &&
+					verify(inp, rules[num5]))) {
+			return ind;
+		} else {
+			return 0;
+		}
+	} else if (sscanf(rule, "%d %d | %d %d", &num1, &num2, &num3, &num4) == 4) {
 		int i = ind;
 		if ((verify(inp, rules[num1]) && verify(inp, rules[num2])) ||
 		    ((ind = i), verify(inp, rules[num3]) && verify(inp, rules[num4]))) {
+			return ind;
+		} else {
+			return 0;
+		}
+	} else if (sscanf(rule, "%d | %d %d", &num1, &num2, &num3) == 3) {
+		int i = ind;
+		if (verify(inp, rules[num1]) ||
+		    ((ind = i), verify(inp, rules[num2]) && verify(inp, rules[num3]))) {
 			return ind;
 		} else {
 			return 0;
@@ -55,7 +72,6 @@ long part_one(FILE *fp)
 	int paragraph = 0;
 	char *line = NULL;
 	size_t len;
-	int i = 0;
 	while (getline(&line, &len, fp) != -1) {
 		if (line[0] == '\n') {
 			paragraph++;
@@ -81,22 +97,46 @@ long part_two(FILE *fp)
 {
 	long res = 0;
 
+	int paragraph = 0;
+	char *line = NULL;
+	size_t len;
+	while (getline(&line, &len, fp) != -1) {
+		if (line[0] == '\n') {
+			paragraph++;
+			continue;
+		}
+
+		if (paragraph == 0) {
+			char rule[64] = { 0 };
+			int ind = 0;
+			sscanf(line, "%d: %64[0-9a-z \"|]", &ind, rule);
+			strcpy(rules[ind], rule);
+		} else if (paragraph == 1) {
+			ind = 0;
+			if (verify(line, rules[0]) == strlen(line) - 1)
+				res++;
+		}
+	}
+
 	return res;
 }
 
 int main(int argc, char *argv[])
 {
-	FILE *fp = fopen("input", "r");
-	if (!fp)
+	FILE *fp1 = fopen("input1", "r");
+	if (!fp1)
+		exit(EXIT_FAILURE);
+	FILE *fp2 = fopen("input2", "r");
+	if (!fp2)
 		exit(EXIT_FAILURE);
 
 	clock_t tic = clock();
-	printf("%lu\n", part_one(fp));
-	rewind(fp);
-	printf("%lu\n", part_two(fp));
+	printf("%lu\n", part_one(fp1));
+	printf("%lu\n", part_two(fp2));
 	clock_t toc = clock();
 	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
-	fclose(fp);
+	fclose(fp1);
+	fclose(fp2);
 	return 0;
 }
