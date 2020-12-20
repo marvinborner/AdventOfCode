@@ -4,13 +4,24 @@
 #include <time.h>
 
 #define COUNT 10
+#define SIZE (10 * sizeof(int))
+#define INP_COUNT 144
+
+#define FLIP_X (0b11 << 0)
+#define FLIP_Y (0b11 << 2)
+#define ROT_ONE (0b11 << 4)
+#define ROT_TWO (0b11 << 6)
+#define ROT_THREE (0b11 << 8)
 
 enum cnt_pos { T, R, B, L };
 
 struct tile {
 	int id;
 
-	int match[144];
+	int match[INP_COUNT];
+	int reversed; // Bitmap
+
+	char image[COUNT][COUNT];
 
 	int cnt[4]; // cnt_pos
 	int top[COUNT];
@@ -23,6 +34,27 @@ struct tile {
 	int left_rev[COUNT];
 };
 
+void set_rotation(int *reversed, int pos_a, int pos_b, int is_rev)
+{
+	int rot = abs((pos_a + 1) - (pos_b + 1));
+
+	if (rot == 0)
+		return;
+
+	if (rot == 1 && !is_rev)
+		*reversed |= ROT_ONE;
+	else if (rot == 2 && !is_rev)
+		*reversed |= ROT_TWO;
+	else if (rot == 3 && !is_rev)
+		*reversed |= ROT_THREE;
+
+	if (is_rev && rot % 2 == 0) {
+		*reversed |= FLIP_X;
+	} else if (is_rev && rot % 2 == 1) {
+		*reversed |= FLIP_Y;
+	}
+}
+
 void reverse(int dest[], int src[])
 {
 	for (int i = 0; i < COUNT; i++) {
@@ -34,7 +66,7 @@ long part_one(FILE *fp)
 {
 	long res = 1;
 
-	struct tile tiles[144] = { 0 };
+	struct tile tiles[INP_COUNT] = { 0 };
 	int tile_cnt = 0;
 
 	char *line = NULL;
@@ -51,6 +83,7 @@ long part_one(FILE *fp)
 			y = 0;
 		} else {
 			struct tile *tile = &tiles[tile_cnt];
+			memcpy(tile->image, line, COUNT);
 			if (y == 0) {
 				for (int i = 0; i < COUNT; i++) {
 					tile->top[i] = line[i] == '#';
@@ -83,28 +116,24 @@ long part_one(FILE *fp)
 	for (int i = 0; i < tile_cnt; i++) {
 		struct tile *tile = &tiles[i];
 		// Find adjacent
-		int *cur, *cur_rev, cnt;
+		int *cur, cnt;
 		for (int j = 0; j < 4; j++) { // TRBL
 			switch (j) {
 			case T:
 				cnt = tile->cnt[T];
 				cur = tile->top;
-				cur_rev = tile->top_rev;
 				break;
 			case R:
 				cnt = tile->cnt[R];
 				cur = tile->right;
-				cur_rev = tile->right_rev;
 				break;
 			case B:
 				cnt = tile->cnt[B];
 				cur = tile->bottom;
-				cur_rev = tile->bottom_rev;
 				break;
 			case L:
 				cnt = tile->cnt[L];
 				cur = tile->left;
-				cur_rev = tile->left_rev;
 				break;
 			default:
 				exit(1);
@@ -116,37 +145,50 @@ long part_one(FILE *fp)
 				if (cmp->id == tile->id)
 					continue;
 
-				int match_cnt = 0;
+				int match_cnt = 0, reversed = 0;
 				if (cnt == cmp->cnt[T]) {
-					if (!memcmp(cur, cmp->top, 40)) {
+					if (!memcmp(cur, cmp->top, SIZE)) {
+						set_rotation(&reversed, T, j, 0);
 						match_cnt++;
-					} else if (!memcmp(cur_rev, cmp->top, 40)) {
+					} else if (!memcmp(cur, cmp->top_rev, SIZE)) {
+						set_rotation(&reversed, T, j, 1);
 						match_cnt++;
 					}
 				}
 				if (cnt == cmp->cnt[R]) {
-					if (!memcmp(cur, cmp->right, 40)) {
+					if (!memcmp(cur, cmp->right, SIZE)) {
+						set_rotation(&reversed, R, j, 0);
 						match_cnt++;
-					} else if (!memcmp(cur_rev, cmp->right, 40)) {
+					} else if (!memcmp(cur, cmp->right_rev, SIZE)) {
+						set_rotation(&reversed, R, j, 1);
+						//reversed |= REV_RIGHT;
 						match_cnt++;
 					}
 				}
 				if (cnt == cmp->cnt[B]) {
-					if (!memcmp(cur, cmp->bottom, 40)) {
+					if (!memcmp(cur, cmp->bottom, SIZE)) {
+						set_rotation(&reversed, B, j, 0);
 						match_cnt++;
-					} else if (!memcmp(cur_rev, cmp->bottom, 40)) {
+					} else if (!memcmp(cur, cmp->bottom_rev, SIZE)) {
+						set_rotation(&reversed, B, j, 1);
+						//reversed |= REV_BOTTOM;
 						match_cnt++;
 					}
 				}
 				if (cnt == cmp->cnt[L]) {
-					if (!memcmp(cur, cmp->left, 40)) {
+					if (!memcmp(cur, cmp->left, SIZE)) {
+						set_rotation(&reversed, L, j, 0);
 						match_cnt++;
-					} else if (!memcmp(cur_rev, cmp->left, 40)) {
+					} else if (!memcmp(cur, cmp->left_rev, SIZE)) {
+						set_rotation(&reversed, L, j, 1);
+						//reversed |= REV_LEFT;
 						match_cnt++;
 					}
 				}
 
 				tile->match[k] += match_cnt;
+				if (reversed != 0)
+					cmp->reversed = reversed;
 			}
 		}
 	}
@@ -154,13 +196,16 @@ long part_one(FILE *fp)
 	for (int i = 0; i < tile_cnt; i++) {
 		struct tile *tile = &tiles[i];
 
-		int cnt = 0;
+		if (tile->reversed)
+			printf("%d: %x\n", tile->id, tile->reversed);
+		int cnt = 0, flipped = 0;
 		for (int j = 0; j < tile_cnt; j++) {
 			cnt += tile->match[j];
 		}
 
-		if (cnt == 2)
+		if (cnt == 2) {
 			res *= tile->id;
+		}
 	}
 
 	return res;
