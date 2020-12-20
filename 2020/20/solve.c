@@ -75,6 +75,9 @@ long part_one(FILE *fp)
 	for (int i = 0; i < tile_cnt; i++) {
 		struct tile *tile = &tiles[i];
 		reverse(tile->top_rev, tile->top);
+		reverse(tile->right_rev, tile->right);
+		reverse(tile->bottom_rev, tile->bottom);
+		reverse(tile->left_rev, tile->left);
 	}
 
 	for (int i = 0; i < tile_cnt; i++) {
@@ -109,7 +112,6 @@ long part_one(FILE *fp)
 			}
 
 			for (int k = 0; k < tile_cnt; k++) {
-				printf("%d: %d %d\n", cnt, tile->id, j);
 				struct tile *cmp = &tiles[k];
 				if (cmp->id == tile->id)
 					continue;
@@ -154,13 +156,11 @@ long part_one(FILE *fp)
 
 		int cnt = 0;
 		for (int j = 0; j < tile_cnt; j++) {
-			//if (tile->match[j] > cnt)
 			cnt += tile->match[j];
 		}
 
-		printf("%d - %d\n", cnt, tile->id);
-		/* res *= tile->id; */
-		//printf("%d\n", tile->best_cnt);
+		if (cnt == 2)
+			res *= tile->id;
 	}
 
 	return res;
