@@ -1,29 +1,9 @@
 const { _, performance } = require("perf_hooks");
 const fs = require("fs");
-const data = fs.readFileSync("input", "utf8").split("\n");
+const d = fs.readFileSync("input", "utf8").split("\n");
 
 function partOne() {
-  const foods = data.map((x) => ({
-    ingredients: x.split(" (contains ")[0].split(" "),
-    allergens: x.split(" (contains ")[1].split(")")[0].split(", "),
-  }));
-
-  const allergens = new Map();
-  for (let food of foods) {
-    for (let allergen of food.allergens) {
-      const prev = allergens.get(allergen);
-      let matching;
-      if (prev)
-        matching = new Set([...food.ingredients].filter((x) => prev.has(x)));
-      else matching = new Set(food.ingredients);
-      allergens.set(allergen, matching);
-    }
-  }
-  const all = foods.map((x) => x.ingredients).flat();
-  const matching = [
-    ...new Set([...allergens.values()].reduce((a, b) => [...a, ...b], [])),
-  ];
-  return all.filter((x) => !matching.includes(x)).length;
+c=" (contains ";f=d.map(x=>({i:x.split(c)[0].split(" "),a:x.split(c)[1].split(")")[0].split(", ")}));a=new Map();for(g of f)for(b of g.a)a.set(b,new Set(a.get(b)?[...g.i].filter(x=>a.get(b).has(x)):g.i));return f.map(x=>x.i).flat().filter(x=>!new Set([...a.values()].reduce((a,b)=>[...a,...b],[])).has(x)).length;
 }
 
 const tic = performance.now();
