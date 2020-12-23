@@ -1,48 +1,12 @@
 const { _, performance } = require("perf_hooks");
 const fs = require("fs");
-const data = fs
-  .readFileSync("input", "utf8")
-  .split("\n")[0]
-  .split("")
-  .map((x) => parseInt(x));
+const D = fs.readFileSync("input", "utf8").split("\n")[0].split("").map(Number);
 
-function partOne() {
-  let moves = 11;
-
-  let cur = 0;
-  const cups = data;
-  while (--moves) {
-    // Pick up
-    const picks = [];
-    for (let i = 0; i < 3; i++) picks[i] = cups.splice(cur + 1, 1);
-
-    // Find destination
-    let dest = 0;
-    let decr = 1;
-    while (!dest) {
-      dest = cups.filter((x) => x == cups[cur] - decr)[0];
-      if (!dest) decr++;
-
-      if (decr > cups.length) {
-        dest = Math.max.apply(Math, cups);
-        break;
-      }
-    }
-
-    cups.splice.apply(cups, [cups.indexOf(dest) + 1, 0].concat(picks));
-    console.log("Cups: " + cups, "Picks: " + picks, "Dest: " + dest);
-
-    cur++;
-  }
-  return 0;
-}
-
-function partTwo() {
-  return 0;
-}
+// Yeeehaw
+P=(I,C,M)=>{c=new Uint32Array(C+1).map((_,i)=>i+1);for(i=0;i<c.length;i++)c[I[i]]=I[(i+1)%I.length];c[0]=I[0];if(C>I.length){c[I[I.length-1]]=I.length+1;c[c.length-1]=I[0]}for(m=1;m<=M;m++){p=[c[c[0]],c[c[c[0]]],c[c[c[c[0]]]]];d=c[0]-1||C;while(p.includes(d))d=d-1||C;c[c[0]]=c[p[2]];c[p[2]]=c[d];c[d]=p[0];c[0]=c[c[0]]}return c};O=()=>{C=P(D,9,100);r=[];c=C[1];while(c!=1){r.push(c);c=C[c]}return +r.join("")};T=()=>{C=P(D,1e6,1e7);return C[1]*C[C[1]]}
 
 const tic = performance.now();
-console.log(partOne());
-console.log(partTwo());
+console.log(O());
+console.log(T());
 const toc = performance.now();
 console.log("TIME: " + ((toc - tic) / 1000).toFixed(6) + " seconds");
