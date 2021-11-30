@@ -1,4 +1,4 @@
-DEBUG = -Wno-error -Og -ggdb3 -s -fsanitize=undefined -fsanitize=address -fstack-protector-all
+DEBUG = -Wno-error -Og -g -s -fsanitize=undefined -fsanitize=address -fstack-protector-all
 CFLAGS = -Wall -Wextra -Werror -Wshadow -Wpointer-arith -Wwrite-strings -Wredundant-decls -Wnested-externs -Wformat=2 -Wmissing-declarations -Wstrict-prototypes -Wmissing-prototypes -Wcast-qual -Wswitch-default -Wswitch-enum -Wunreachable-code -Wundef -Wold-style-definition -Wvla -pedantic-errors -Ofast
 
 # Not the best makefile but idc

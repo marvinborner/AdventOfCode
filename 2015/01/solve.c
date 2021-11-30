@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-int part_one(FILE *fp)
+static int part_one(FILE *fp)
 {
 	int res = 0;
 
@@ -17,7 +17,7 @@ int part_one(FILE *fp)
 	return res;
 }
 
-int part_two(FILE *fp)
+static int part_two(FILE *fp)
 {
 	int res = 0, floor = 0;
 
@@ -39,6 +39,9 @@ int part_two(FILE *fp)
 
 int main(int argc, char *argv[])
 {
+	(void)argc;
+	(void)argv;
+
 	FILE *fp = fopen("input", "r");
 	if (!fp)
 		exit(EXIT_FAILURE);
