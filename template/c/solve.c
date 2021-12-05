@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define COUNT(a) ((int)(sizeof(a) / sizeof 0 [a]))
+
 #define FORLINE                                                                                    \
 	char *line = NULL;                                                                         \
 	size_t len = 0;                                                                            \
