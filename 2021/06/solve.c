@@ -1,65 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
-#define COUNT(a) ((int)(sizeof(a) / sizeof 0 [a]))
-
-#define FORLINE                                                                                    \
-	char *line = NULL;                                                                         \
-	size_t len = 0;                                                                            \
-	while (getline(&line, &len, fp) != EOF)
-#define FREELINE                                                                                   \
-	if (line)                                                                                  \
-	free(line)
-
-#define FORCH                                                                                      \
-	char ch = 0;                                                                               \
-	while ((ch = fgetc(fp)) != EOF)
-
-#define WHOLE                                                                                      \
-	fseek(fp, 0, SEEK_END);                                                                    \
-	long fsize = ftell(fp);                                                                    \
-	fseek(fp, 0, SEEK_SET);                                                                    \
-	char *data = malloc(fsize + 1);                                                            \
-	fread(data, 1, fsize, fp);                                                                 \
-	data[fsize] = 0;
-/* data[fsize--] = 0 */
-
-static long iterate(char *fish, long cnt)
+static void iterate(long *timers, long *birth, long *cnt)
 {
-	/* for (int i = 0; i < cnt; i++) */
-	/* 	printf("%d,", fish[i]); */
-	/* printf("\n"); */
+	long next = birth[0];
+	birth[0] = birth[1];
+	birth[1] = timers[0];
 
-	long ret = cnt;
-	for (long i = 0; i < cnt; i++) {
-		if (fish[i] == 0) {
-			fish[i] = 6;
-			fish[ret++] = 8;
-		} else {
-			fish[i]--;
-		}
-	}
-
-	return ret;
+	long x = timers[0];
+	for (int i = 0; i < 6; i++)
+		timers[i] = timers[i + 1];
+	timers[6] = x + next;
+	*cnt += birth[1];
 }
 
-static long solve(FILE *fp)
+static void solve(FILE *fp)
 {
-	char *fish = malloc(20000000000 * sizeof(char));
+	long timers[7] = { 0 };
+	long birth[2] = { 0 };
 
 	long cnt = 0;
 	char ch;
-	while (fscanf(fp, "%d%c", (int *)&fish[cnt++], &ch) != EOF && (ch == ',' || ch == '\n'))
-		;
-	cnt -= 1; // newline
+	int timer;
+	while (fscanf(fp, "%d%c", &timer, &ch) != EOF && (ch == ',' || ch == '\n')) {
+		cnt++;
+		timers[timer]++;
+	}
 
-	for (int i = 0; i < 256; i++)
-		cnt = iterate(fish, cnt);
-
-	free(fish);
-
-	return cnt;
+	for (int i = 0; i < 80; i++)
+		iterate(timers, birth, &cnt);
+	printf("%lu\n", cnt);
+	for (int i = 80; i < 256; i++)
+		iterate(timers, birth, &cnt);
+	printf("%lu\n", cnt);
 }
 
 int main(int argc, char *argv[])
@@ -72,7 +47,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 
 	clock_t tic = clock();
-	printf("%lu\n", solve(fp));
+	solve(fp);
 	clock_t toc = clock();
 	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
