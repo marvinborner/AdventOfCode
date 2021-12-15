@@ -89,7 +89,7 @@ static int part_one(FILE *fp)
 
 	int visited[SIZE][SIZE] = { 0 };
 
-	struct queue *queue = create(500);
+	struct queue *queue = create(1000);
 	push(queue, 0, 0, 0);
 
 	while (1) {
@@ -109,6 +109,10 @@ static int part_one(FILE *fp)
 			push(queue, x + 1, y, risk + GET(x + 1, y));
 		if (y + 1 < SIZE && !visited[x][y + 1])
 			push(queue, x, y + 1, risk + GET(x, y + 1));
+		if (x - 1 >= 0 && !visited[x - 1][y])
+			push(queue, x - 1, y, risk + GET(x - 1, y));
+		if (y - 1 >= 0 && !visited[x][y - 1])
+			push(queue, x, y - 1, risk + GET(x, y - 1));
 	}
 
 	free(data);
@@ -131,7 +135,7 @@ static int part_two(FILE *fp)
 
 	int visited[SIZE2][SIZE2] = { 0 };
 
-	struct queue *queue = create(1500);
+	struct queue *queue = create(10000);
 	push(queue, 0, 0, 0);
 
 	while (1) {
@@ -143,16 +147,18 @@ static int part_two(FILE *fp)
 
 		if (visited[x][y])
 			continue;
-		if (x == SIZE2 - 1 && y == SIZE2 - 1) {
-			risk -= GET2(x, y); // Hmmm
+		if (x == SIZE2 - 1 && y == SIZE2 - 1)
 			break;
-		}
 
 		visited[x][y] = 1;
 		if (x + 1 < SIZE2 && !visited[x + 1][y])
 			push(queue, x + 1, y, risk + GET2(x + 1, y));
 		if (y + 1 < SIZE2 && !visited[x][y + 1])
 			push(queue, x, y + 1, risk + GET2(x, y + 1));
+		if (x - 1 >= 0 && !visited[x - 1][y])
+			push(queue, x - 1, y, risk + GET2(x - 1, y));
+		if (y - 1 >= 0 && !visited[x][y - 1])
+			push(queue, x, y - 1, risk + GET2(x, y - 1));
 	}
 
 	free(data);
