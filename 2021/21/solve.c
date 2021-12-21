@@ -56,11 +56,54 @@ static int part_one(FILE *fp)
 	return MIN(score1, score2) * aah;
 }
 
-static int part_two(FILE *fp)
-{
-	int res = 0;
+struct won {
+	long a, b;
+};
 
-	return res;
+static struct {
+	int exists;
+	struct won won;
+} cache[10][10][21][21] = { 0 };
+
+static struct won count(long player1, long player2, long score1, long score2)
+{
+	if (cache[player1 - 1][player2 - 1][score1][score2].exists)
+		return cache[player1 - 1][player2 - 1][score1][score2].won;
+
+	struct won won = { 0 };
+	for (int a = 1; a <= 3; a++) {
+		for (int b = 1; b <= 3; b++) {
+			for (int c = 1; c <= 3; c++) {
+				int sum = a + b + c;
+				long player_switch = (player1 + sum - 1) % 10 + 1;
+				long score_switch = score1 + player_switch;
+				if (score_switch >= 21) {
+					won.a += 1;
+				} else {
+					// Switch
+					struct won aah =
+						count(player2, player_switch, score2, score_switch);
+					won.a += aah.b;
+					won.b += aah.a;
+				}
+			}
+		}
+	}
+
+	cache[player1 - 1][player2 - 1][score1][score2].exists = 1;
+	cache[player1 - 1][player2 - 1][score1][score2].won = won;
+
+	return won;
+}
+
+static long part_two(FILE *fp)
+{
+	int player1, player2;
+	fscanf(fp, "Player 1 starting position: %d\nPlayer 2 starting position: %d", &player1,
+	       &player2);
+
+	struct won won = count(player1, player2, 0, 0);
+	return MAX(won.a, won.b);
 }
 
 int main(int argc, char *argv[])
@@ -75,7 +118,7 @@ int main(int argc, char *argv[])
 	clock_t tic = clock();
 	printf("%d\n", part_one(fp));
 	rewind(fp);
-	printf("%d\n", part_two(fp));
+	printf("%lu\n", part_two(fp));
 	clock_t toc = clock();
 	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
