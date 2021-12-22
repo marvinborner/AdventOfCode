@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -28,51 +29,16 @@
 	data[fsize] = 0;
 /* data[fsize--] = 0 */
 
-#define CUBES 1000000
-
-struct cube {
-	char exists;
-	int x, y, z;
-};
-
-static void add_cube(struct cube *cubes, int x, int y, int z)
-{
-	for (int i = 0; i < CUBES; i++) {
-		if (!cubes[i].exists) {
-			cubes[i].exists = 1;
-			cubes[i].x = x;
-			cubes[i].y = y;
-			cubes[i].z = z;
-			return;
-		}
-	}
-
-	fprintf(stderr, "No more cubes left!\n");
-	exit(1);
-}
-
-static void remove_cube(struct cube *cubes, int x, int y, int z)
-{
-	for (int i = 0; i < CUBES; i++) {
-		if (cubes[i].exists && (cubes[i].x == x || cubes[i].y == y || cubes[i].z == z)) {
-			cubes[i].exists = 0;
-			return;
-		}
-	}
-}
-
 static int part_one(FILE *fp)
 {
 	int res = 0;
 
-	struct cube *cubes = calloc(CUBES, sizeof(*cubes));
+	char cubes[100][100][100] = { 0 };
 
 	char state[4];
 	int xmin, xmax, ymin, ymax, zmin, zmax;
 	while (fscanf(fp, "%[^ ] x=%d..%d,y=%d..%d,z=%d..%d\n", state, &xmin, &xmax, &ymin, &ymax,
 		      &zmin, &zmax) == 7) {
-		/* printf("%s %d..%d %d..%d %d..%d\n", state, xmin, xmax, ymin, ymax, zmin, ymax); */
-
 		xmin = MAX(xmin, -50);
 		xmax = MIN(xmax, 50);
 		ymin = MAX(ymin, -50);
@@ -80,14 +46,13 @@ static int part_one(FILE *fp)
 		zmin = MAX(zmin, -50);
 		zmax = MIN(zmax, 50);
 
-		for (int x = xmin; x < xmax; x++) {
-			for (int y = ymin; y < ymax; y++) {
-				for (int z = zmin; z < zmax; z++) {
-					/* printf("%d %d %d\n", x, y, z); */
+		for (int x = MAX(xmin, -50); x <= MIN(xmax, 50); x++) {
+			for (int y = MAX(ymin, -50); y <= MIN(ymax, 50); y++) {
+				for (int z = MAX(zmin, -50); z <= MIN(zmax, 50); z++) {
 					if (state[1] == 'n') { // on
-						add_cube(cubes, x, y, z);
+						cubes[x + 50][y + 50][z + 50] = 1;
 					} else if (state[1] == 'f') { // off
-						remove_cube(cubes, x, y, z);
+						cubes[x + 50][y + 50][z + 50] = 0;
 					} else {
 						fprintf(stderr, "Fatal error\n");
 					}
@@ -96,12 +61,18 @@ static int part_one(FILE *fp)
 		}
 	}
 
+	for (int x = 0; x < 100; x++)
+		for (int y = 0; y < 100; y++)
+			for (int z = 0; z < 100; z++)
+				if (cubes[x][y][z])
+					res++;
+
 	return res;
 }
 
-static int part_two(FILE *fp)
+static long part_two(FILE *fp)
 {
-	int res = 0;
+	long res = 0;
 
 	return res;
 }
@@ -118,7 +89,7 @@ int main(int argc, char *argv[])
 	clock_t tic = clock();
 	printf("%d\n", part_one(fp));
 	rewind(fp);
-	printf("%d\n", part_two(fp));
+	printf("%lu\n", part_two(fp));
 	clock_t toc = clock();
 	printf("TIME: %f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
