@@ -1,56 +1,13 @@
 const { _, performance } = require("perf_hooks");
 const fs = require("fs");
-const data = fs.readFileSync("input", "utf8").split("inp").map(block => block.split("\n")).slice(1);
 
-function part_one() {
-    let res = 0;
-
-    // console.log(data);
-    const xs = data.map(block => +block[5].split(" ").slice(-1)[0]);
-    const ys = data.map(block => +block[15].split(" ").slice(-1)[0]);
-    const zs = data.map(block => +block[4].split(" ").slice(-1)[0]);
-    console.log(xs,ys,zs);
-
-    let w = 89999999999999;
-    while (1) {
-        const ws = Array.from(String(w), Number);
-
-        let z = 0;
-        for (let i = 0; i < 14; i++) {
-            let x = 0, y = 0;
-            x = z;
-            x %= 26;
-            z = Math.floor(z / zs[i]);
-            x += xs[i];
-            x = (x == ws[i]) ? 0 : 1;
-            y = 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y = ws[i] + ys[i];
-            y *= x;
-            z += y;
-        }
-        if (z == 0) {
-            console.log("Found", w, x, y, z);
-            break;
-        }
-        if (w % 1000000 == 0)
-            console.log(w, z);
-        w--;
-    }
-
-    return w;
-}
-
-function part_two() {
-    let res = 0;
-
-    return res;
+function solve() {
+    n=[],m=[],t=[];
+    fs.readFileSync("input", "utf8").split("in").map(b=>b.split("\n")).slice(1).forEach((b,i)=>{if(b[4][6]=='1')t.push([i,+b[15].split(" ").slice(-1)[0]]);else{[j,x]=t.pop();d=x+ +b[5].split(" ").slice(-1)[0];if(d<0)[i,j,d]=[j,i,-d];m[i]=9;m[j]=9-d;n[i]=1+d;n[j]=1}})
+    console.log(m.join(""),n.join(""));
 }
 
 const tic = performance.now();
-console.log(part_one());
-console.log(part_two());
+solve();
 const toc = performance.now();
 console.log("TIME: " + ((toc - tic) / 1000).toFixed(6) + " seconds");

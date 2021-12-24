@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+// Non-trial-and-error solution in solve.js
+
 static const int xs[] = { 14, 14, 14, 12, 15, -12, -12, 12, -7, 13, -8, -5, -10, -7 };
 static const int ys[] = { 14, 2, 1, 13, 5, 5, 5, 9, 3, 13, 2, 1, 11, 8 };
 static const int zs[] = { 1, 1, 1, 1, 1, 26, 26, 1, 26, 1, 26, 26, 26, 26 };
