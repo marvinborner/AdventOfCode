@@ -18,10 +18,10 @@ def solve(mover_version):
                     stacks[i // 4].insert(0, cols[i])
                 i += 4
         else:
-            proc = line.replace("move ", "").replace("from ", "").replace("to ", "").replace("target ", "").split(" ")
-            what = int(proc[0])
-            source = int(proc[1]) - 1
-            target = int(proc[2]) - 1
+            proc = line.split(" ")
+            what = int(proc[1])
+            source = int(proc[3]) - 1
+            target = int(proc[5]) - 1
 
             crates = stacks[source][-what:]
             if mover_version == 9000:
