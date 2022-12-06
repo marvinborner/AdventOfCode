@@ -1,19 +1,12 @@
-data = require("fs").readFileSync("input", "utf8").split("\n");
+d=require("fs").readFileSync("input", "utf8").split("")
 
-function part1()
+function solve(k)
 {
-	res = 0
-	return res
-}
-
-function part2()
-{
-	res = 0
-	return res
+	return d.map((_,i)=>d.slice(i,i+k)).findIndex(a=>(new Set(a)).size==a.length)+k
 }
 
 const tic = performance.now();
-console.log(part1());
-console.log(part2());
+console.log(solve(4));
+console.log(solve(14));
 const toc = performance.now();
 console.log("TIME: " + ((toc - tic) / 1000).toFixed(6) + " seconds");
