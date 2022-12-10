@@ -20,7 +20,7 @@ def solve():
         if cycle - 20 >= 0 and (cycle - 20) % 40 == 0:
             signal_strength += cycle * x
 
-        crt[row][col] = "#" if col in [x-1,x,x+1] else "."
+        crt[row][col] = "█" if col in [x-1,x,x+1] else " "
         col += 1
 
         if instr[0] == "noop":
