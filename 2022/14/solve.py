@@ -56,10 +56,7 @@ def solve(grounded):
         rocks(grid, line)
 
     if grounded:
-        ground = max(
-            max([i for i, y in enumerate(col) if y == ROCK], default=0)
-            for col in grid
-        )
+        ground = max(y for _, y in sum(data, []))
         for x in range(X):
             grid[x][ground + 2] = ROCK
 
