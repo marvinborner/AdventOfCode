@@ -1,43 +1,19 @@
-import re
-
-L = [re.sub(" +", " ", l.strip()) for l in open("input").readlines()]
+L = [" ".join(l.split()) for l in open("input").readlines()]
 
 
-def solve1():
-    res = 0
-    for l in L:
-        ls = l.split(": ")
-        card = ls[0]
-        winning, have = [
-            list(map(int, a.split(" "))) for a in ls[1].split(" | ")
-        ]
-        s = 0
-        i = True
-        for x in have:
-            if x in winning:
-                s = s + 1 if i else s * 2
-                i = False
-        res += s
-    print(res)
-
-
-def solve2():
-    res = 0
-    dup = [1] * len(L)
+def solve():
+    p1 = 0
+    p2 = [1] * len(L)
     for i, l in enumerate(L):
-        ls = l.split(": ")
-        card = ls[0]
+        card, nums = l.split(": ")
         winning, have = [
-            list(map(int, a.split(" "))) for a in ls[1].split(" | ")
+            list(map(int, a.split(" "))) for a in nums.split(" | ")
         ]
-        s = 0
-        for x in have:
-            if x in winning:
-                s += 1
+        s = sum(1 for x in have if x in winning)
         for j in range(i + 1, i + s + 1):
-            dup[j] += dup[i]
-    print(sum(dup))
+            p2[j] += p2[i]
+        p1 += 0 if s == 0 else 2 ** (s - 1)
+    print(p1, sum(p2))
 
 
-solve1()
-solve2()
+solve()
