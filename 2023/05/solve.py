@@ -1,39 +1,51 @@
+# I also wrote a solution in Haskell but it was much uglier than this..
+# (and didn't fully work)
+
 L = open("input").read().strip().split("\n\n")
 
+p1 = float("infinity")
+p2 = float("infinity")
 
-def part1():
-    seeds = []
-    mp = []
+seeds = []
+mp = []
 
-    allI = []
+for b in L:
+    ls = b.split("\n")
+    if ls[0].startswith("seeds:"):
+        seeds = [int(n) for n in ls[0].split(" ")[1:]]
+        continue
 
-    for b in L:
-        ls = b.split("\n")
-        if ls[0].startswith("seeds:"):
-            seeds = [int(n) for n in ls[0].split(" ")[1:]]
-            continue
+    mp.append([])
+    for m in ls[1:]:
+        mp[len(mp) - 1].append([int(n) for n in m.split(" ")])
 
-        mp.append({})
-        curr = mp[len(mp) - 1]
-        for m in ls[1:]:
-            ms = [int(n) for n in m.split(" ")]
-            for off in range(ms[2]):
-                # curr[ms[1] + off] = ms[0] + off
-                curr[ms[0] + off] = ms[1] + off
-            allI += list(range(ms[0], ms[0] + ms[2]))
+# part 1
+for seed in seeds:
+    curr = seed
+    for m in mp:
+        for dest, source, inc in m:
+            if source <= curr < source + inc:
+                curr += dest - source
+                break
+    p1 = min(curr, p1)
 
-    # for i in range(len(mp) - 1, -1, -1):
-    mn = float("infinity")
-    res = 0
-    for loc in allI:
-        curr = mp[-1].get(loc, loc)
-        for i in range(len(mp) - 2, -1, -1):
-            curr = mp[i].get(curr, curr)
-        print(loc, curr)
-        if curr in seeds and loc < mn:
-            mn = curr
-            res = loc
-    print(res)
+# part 2
+for i in range(0, len(seeds), 2):
+    start, length = seeds[i], seeds[i + 1]
+    seed = start
+    off = length
+    while seed <= start + length:
+        curr = seed
+        for m in mp:
+            for dest, source, inc in m:
+                if source <= curr < source + inc:
+                    off = max(min(off, source + inc - curr), 1)
+                    curr += dest - source
+                    break
+        p2 = min(curr, p2)
+        seed += off
+        off = length - seed + start
 
 
-part1()
+print(p1)
+print(p2)
