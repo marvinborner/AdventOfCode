@@ -4,31 +4,37 @@ L = [
 ]
 
 
-def groups(pat):
-    gs = []
-    c = []
-    for p in pat:
-        if p in "#?":
-            c.append(p)
-        elif c:
-            gs.append(c)
-            c = []
-    return gs[::-1]
-
-
+# look mum no recursion!! :OOO
 def arrangements(pat, sol):
-    arr = 1
+    arr = 0
+    done = [0]
+    sols = [sol]
+    pats = [pat]
 
-    gs = groups(pat)
-    for i, g in enumerate(gs):
-        if len(g) == sol[0]:  # ???.[#??] 1,1,[3]
-            del sol[0]
+    current = (tuple(sol),pat)
+
+    while pats or sols:
+        p = pats.pop()
+        s = sols.pop()
+        d = done.pop()
+
+        if not p:
+            arr += 1 if not s and not d else 0
             continue
-        if g.count("#") == 0:
-            if len(g) == len(sol) + 1 and len(sol) == sum(sol):  # [???].### [1,1],3
-                break
-            # if len(g) > len(sol)
-        print(g, sol)
+
+        for ch in "#." if p[0] == "?" else p[0]:
+            if ch == '#':
+                sols.append(s)
+                pats.append(p[1:])
+                done.append(d + 1)
+            elif not d:
+                sols.append(s)
+                pats.append(p[1:])
+                done.append(0)
+            elif s and s[0] == d:
+                sols.append(s[1:])
+                pats.append(p[1:])
+                done.append(0)
 
     return arr
 
@@ -36,8 +42,16 @@ def arrangements(pat, sol):
 def part1():
     res = 0
     for pat, sol in L:
-        res += arrangements(f".{pat}.", sol[::-1])
+        res += arrangements(f".{pat}.", sol)
+    print(res)
+
+
+def part2():
+    res = 0
+    for pat, sol in L:
+        res += arrangements("?".join([pat] * 5) + ".", sol * 5)
     print(res)
 
 
 part1()
+# part2()
