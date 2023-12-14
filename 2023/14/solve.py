@@ -24,25 +24,44 @@ def tilt(mp, d):
     return mp
 
 
-def part1():
+def load(mp):
     res = 0
-
-    mp = tilt(L, 0)
-
     for i, l in enumerate(mp):
         res += (len(mp) - i) * l.count("O")
-    print(res)
+    return res
+
+
+def part1():
+    res = 0
+    mp = tilt(L, 0)
+    print(load(mp))
 
 
 def part2():
     res = 0
 
+    hist = {}
+    cycle = 0
+
     mp = L
-    for i in range(100):
+    i = 0
+    while True:
         mp = tilt(mp, 0)
         mp = tilt(mp, 1)
         mp = tilt(mp, 2)
         mp = tilt(mp, 3)
+
+        if cycle:
+            if i % cycle == 0:
+                break
+        else:
+            key = tuple(tuple(l) for l in mp)
+            if key in hist:
+                cycle = i - hist[key] - 1
+            else:
+                hist[key] = i
+
+        i += 1
 
     res = 0
     for j, l in enumerate(mp):
