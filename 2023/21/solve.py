@@ -53,19 +53,15 @@ while q:
             pre[n] += 1
 
 print(part1)
-print(pre)
 
 poly = {}
-for i in range(PREHEAT):
-    j = C + i * W
-    if j % 2:
-        poly[i] = pre[j]
+for i, p in pre.items():
+    if (i + 1) % W == C:
+        poly[i + 1] = p
 
-print(poly)
 f = Polynomial.fit(list(poly.keys()), list(poly.values()), 2)
-x = (FIN - C) / W
-res = f(x)
-print(f, x, round(res))
+res = f(FIN)
+print(f, round(res))
 
 # for i in range(PREHEAT, (FIN - C) / W + 1):
 #     poly.append(predict(poly))
