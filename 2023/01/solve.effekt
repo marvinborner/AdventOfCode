@@ -1,0 +1,46 @@
+// I tried to use many effects :)
+
+import io/error
+import exception
+import char
+import stream
+
+def collectLine(): Unit / {read[Char], emit[Int], stop} = {
+  val c = do read[Char]()
+  if (c == '\n') do stop()
+
+  with default[WrongFormat, Unit] { collectLine() }
+  val number = digitValue(c)
+  do emit(number)
+  collectLine()
+}
+
+def solve(): Unit / {read[Char], emit[Int], stop} = {
+  val line: List[Int] = collectList {
+    with exhaustively
+    collectLine()
+  }
+
+  val sum = line match {
+    case Cons(head, Nil()) => head * 10 + head
+    case Cons(head, ls) => {
+      with default[MissingValue, Int] { 0 }
+      head * 10 + ls.last
+    }
+    case Nil() => do stop()
+  }
+
+  do emit(sum)
+}
+
+def main() = {
+  with on[IOError].panic
+  with readFile("input")
+  with decodeUTF8
+
+  // part 1
+  println(sum {
+    with exhaustively
+    solve()
+  })
+}
