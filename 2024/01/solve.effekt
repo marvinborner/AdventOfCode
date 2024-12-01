@@ -1,0 +1,70 @@
+import io/error
+import exception
+import char
+import stream
+
+def collectNumber(): Unit / { read[Char], emit[Char], stop } = {
+  val c = do read[Char]()
+  if (not(c.isDigit)) do stop()
+  do emit(c)
+  collectNumber()
+}
+
+def parse(): Unit / { read[Char], emit[Tuple2[Int, Int]], stop } = {
+  with on[WrongFormat].default { do stop() }
+
+  val a: Int = collectString {
+    with exhaustively
+    collectNumber()
+  }.toInt
+
+  do read[Char]()
+  do read[Char]()
+
+  val b: Int = collectString {
+    with exhaustively
+    collectNumber()
+  }.toInt
+
+  do emit((a, b))
+}
+
+def transpose[R] { stream : () => R / emit[Tuple2[Int, Int]] }: (R, Tuple2[List[Int], List[Int]]) = {
+  var a = Nil()
+  var b = Nil()
+  try {
+    (stream(), (a, b))
+  } with emit[Tuple2[Int, Int]] { v =>
+    a = Cons(v.first, a)
+    b = Cons(v.second, b)
+    resume(())
+  }
+}
+
+def part1(a: List[Int], b: List[Int]) =
+  zipWith(a, b) { (a, b) => abs(a - b) }.sum
+
+def count(lst: List[Int], el: Int) =
+  collect(lst) { x => if (x == el) Some(()) else None() }.size
+
+def part2(a: List[Int], b: List[Int]) = {
+  var res = 0
+  a.foreachIndex { (index, value) =>
+    res = res + value * b.count(value)
+  }
+  res
+}
+
+def main() = {
+  with on[IOError].panic
+  with readFile("input")
+  with decodeUTF8
+
+  val input: Tuple2[List[Int], List[Int]] = transpose {
+    with exhaustively
+    parse()
+  }.second
+
+  println(part1(input.first.sort, input.second.sort))
+  println(part2(input.first, input.second))
+}
