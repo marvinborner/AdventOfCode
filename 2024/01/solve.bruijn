@@ -17,7 +17,7 @@ transpose y [[rec]]
 :test (transpose [0 [0 (+1) [0 (+2) [[0]]]] [0 [0 (+3) [0 (+4) [[0]]]] [[0]]]]) ([0 [0 (+1) [0 (+3) [[0]]]] [0 [0 (+2) [0 (+4) [[0]]]] [[0]]]])
 
 part1 map go
-	go &[[[0 (S.sort-asc 2) (S.sort-asc S._1)]]] → &[[S.zip-with (N.abs ∘∘ N.sub) 1 0]] → N.sum
+	go &[[[0 (S.sort-asc 2) (S.sort-asc S._1)]]] → &(S.zip-with (N.abs ∘∘ N.sub)) → N.sum
 
 part2 [0]
 
