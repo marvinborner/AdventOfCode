@@ -1,0 +1,26 @@
+:import std/Combinator .
+:import std/Monad/Parser .
+:import std/Math N
+:import std/String S
+:import std/Char C
+
+parse some (cons <$> number <*> (spaces *> (number <* newline)))
+	number S.string→number <$> (some (satisfy C.numeric?))
+	spaces some (satisfy (C.eq? ' '))
+	newline satisfy (C.eq? '\n')
+	cons [[[0 2 [0 2 [[0]]]]]]
+
+transpose y [[rec]]
+	rec S.∅?(S.^0) [[0]] trans
+		trans [0 (S.map &[[1]] 1) (2 (S.map &[[0]] 1))]
+
+:test (transpose [0 [0 (+1) [0 (+2) [[0]]]] [0 [0 (+3) [0 (+4) [[0]]]] [[0]]]]) ([0 [0 (+1) [0 (+3) [[0]]]] [0 [0 (+2) [0 (+4) [[0]]]] [[0]]]])
+
+part1 map go
+	go &[[[0 (S.sort-asc 2) (S.sort-asc S._1)]]] → &[[S.zip-with (N.abs ∘∘ N.sub) 1 0]] → N.sum
+
+part2 [0]
+
+# main (φ (S.cons ⋔ (transpose <$> parse)) part1 part2) → [0 [0] [[1]]]
+
+main (part1 (transpose <$> parse)) → [0 [0] [[1]]]
