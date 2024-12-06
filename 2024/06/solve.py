@@ -1,7 +1,7 @@
 #!/bin/env python
 
 
-L = [l.strip() for l in open("input").readlines()]
+L = [list(l.strip()) for l in open("input").readlines()]
 
 UP = 0
 RIGHT = 1
@@ -12,18 +12,22 @@ YLEN = len(L)
 XLEN = len(L[0])
 
 
-def start():
-    for y, row in enumerate(L):
-        for x, col in enumerate(row):
-            if col == "^":
-                L[y] = "".join(map(lambda c: "." if c == "^" else c, L[y]))
-                return (y, x, UP)
+def put(y, x, c):
+    L[y][x] = c
 
 
 def get(y, x):
     if 0 <= y < YLEN and 0 <= x < XLEN:
         return L[y][x]
     return "#"
+
+
+def start():
+    for y, row in enumerate(L):
+        for x, col in enumerate(row):
+            if col == "^":
+                L[y][x] = "."
+                return y, x
 
 
 def move(y, x, d):
@@ -40,20 +44,49 @@ def move(y, x, d):
     return (y, x, (d + 1) % 4)
 
 
-def part1():
-    visits = set()
-    y, x, d = start()
-    visits.add((y, x))
-    while not (
+def outside(y, x, d):
+    return (
         (d == UP and y == 0)
         or (d == RIGHT and x == XLEN - 1)
         or (d == DOWN and y == YLEN - 1)
         or (d == LEFT and x == 0)
-    ):
-        y, x, d = move(y, x, d)
-        visits.add((y, x))
+    )
 
+
+def part1(y, x):
+    visits = set()
+    visits.add((y, x))
+    p = (y, x, UP)
+    while not outside(*p):
+        p = move(*p)
+        visits.add((p[0], p[1]))
     print(len(visits))
 
 
-part1()
+def part2(ys, xs):
+    res = 0
+
+    def loopy(y, x):
+        visits = set()
+        p = (y, x, UP)
+        while not outside(*p):
+            if p in visits:
+                return True
+            visits.add(p)
+            p = move(*p)
+        return False
+
+    for y in range(YLEN):
+        for x in range(XLEN):
+            if get(y, x) == ".":
+                put(y, x, "#")
+                loops = loopy(ys, xs)
+                put(y, x, ".")
+                if loops:
+                    res += 1
+    print(res)
+
+
+s = start()
+part1(*s)
+part2(*s)
