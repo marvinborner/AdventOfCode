@@ -6,11 +6,11 @@ import           Control.Monad.State            ( State
                                                 , modify
                                                 )
 import           Data.Bits                      ( (.&.)
+                                                , shiftL
                                                 , xor
                                                 )
 import           Data.Functor                   ( (<&>) )
 import           Data.Void
-import           Debug.Trace
 import           Prelude                 hiding ( (||) )
 import           Text.Megaparsec         hiding ( Pos
                                                 , State
@@ -35,24 +35,18 @@ type Parser = Parsec Void String
 type ST = State Registers
 
 register :: Parser Int
-register = do
-  string "Register "
-  reg <- oneOf "ABC"
-  string ": "
-  L.decimal <* some (char '\n')
+register =
+  string "Register " *> oneOf "ABC" *> string ": " *> L.decimal <* char '\n'
 
 program :: Parser Program
-program = do
-  string "Program: "
-  many $ L.decimal <* optional (char ',')
+program = string "Program: " *> L.decimal `sepBy` char ','
 
 input :: Parser (Registers, Program)
 input = do
-  regs <-
-    Registers <$> register <*> register <*> register <*> pure 0 <*> pure Nothing
-  prog <- program
-  many $ char '\n'
-  return (regs, prog)
+  regs <- Registers <$> register <*> register <*> register
+  char '\n'
+  prog <- program <* many (char '\n')
+  return (regs 0 Nothing, prog)
 
 combo :: Int -> ST Int
 combo x | x <= 3 = return x
@@ -93,25 +87,35 @@ evalInstruction 7 x = do
   modify $ \s -> s { c = numerator `div` denominator }
 
 eval :: Program -> ST Out
-eval is = do
-  ip <- gets pc
-  if ip + 1 > length is
-    then return []
-    else do
-      evalInstruction (is !! ip) (is !! (ip + 1))
-      ip' <- gets pc -- jumped?
-      mx  <- gets out
-      modify $ \s -> s { out = Nothing, pc = if ip == ip' then ip + 2 else ip' }
-      next <- eval is
-      return $ case mx of
-        Just x  -> x : next
-        Nothing -> next
+eval is = gets pc >>= \case
+  ip | ip + 1 > length is -> return []
+  ip                      -> do
+    evalInstruction (is !! ip) (is !! (ip + 1))
+    ip' <- gets pc -- jumped?
+    mx  <- gets out
+    modify $ \s -> s { out = Nothing, pc = if ip == ip' then ip + 2 else ip' }
+    next <- eval is
+    return $ case mx of
+      Just x  -> x : next
+      Nothing -> next
+
+rev :: Registers -> Program -> [Int]
+rev regs prog = go [0] prog
+ where
+  go z []       = z
+  go z (x : xs) = do
+    val <- go z xs
+    off <- [0 .. 7]
+    let try = val `shiftL` 3 + off
+    case evalState (eval prog) (regs { a = try }) of
+      h : _ | h == x -> return try
+      _              -> empty
 
 main :: IO ()
 main = do
   f <- readFile "input"
   case runParser (input <* eof) "" f of
     Right (regs, prog) -> do
-      print prog
       print $ evalState (eval prog) regs
+      print $ rev regs prog
     Left err -> putStrLn $ errorBundlePretty err
