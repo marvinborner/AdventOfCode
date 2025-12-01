@@ -1,0 +1,86 @@
+import io/error
+import io/filesystem
+
+type Direction { Left(); Right() }
+record Rotation(direction: Direction, amount: Int)
+effect Password = read[Rotation]
+
+def collect(): Int / { Exception[WrongFormat], read[Char] } = {
+  def go(): Unit / { read[Char], emit[Char], stop } = {
+    val c = do read()
+    if (not(c.isDigit)) do stop()
+    do emit(c)
+    go()
+  }
+  string::collect { exhaustively { go() } }.toInt
+}
+
+def parse(): Unit / { read[Char], emit[Rotation] } = {
+  with on[WrongFormat].panic
+  with exhaustively
+
+  val ch = do read[Char]()
+  val direction = ch match {
+    case 'L' => Left()
+    case 'R' => Right()
+    case _   => wrongFormat()
+  }
+  val amount: Int = collect()
+  do emit[Rotation](Rotation(direction, amount))
+}
+
+effect Solution(part1: Int, part2: Int): Unit
+effect Click(at: Int): Unit
+effect Final(at: Int): Unit
+
+def betterMod(a: Int, b: Int) = a - floor(a.toDouble / b.toDouble) * b
+
+def rotate(state: Int, direction: Direction, amount: Int): Int = (direction match {
+  case Left()  => state - amount
+  case Right() => state + amount
+}).betterMod(100)
+
+def enterPassword(): Unit / { Password, Click, Final } = {
+  var state = 0
+
+  with exhaustively
+  val Rotation(direction, amount) = do read()
+  each(0, amount) { i =>
+    do Click(rotate(state, direction, i))
+  }
+  state = rotate(state, direction, amount)
+  do Final(state)
+}
+
+def solver() { enter: => Unit / { Click, Final } }: Unit / Solution = {
+  var part1 = 0
+  var part2 = 0
+
+  try enter()
+  with Final { n => resume(if (n == 0) part1 = part1 + 1) }
+  with Click { n => resume(if (n == 0) part2 = part2 + 1) }
+
+  do Solution(part1, part2 - 1)
+}
+
+def printer() { solver: => Unit / Solution }: Unit = {
+  try solver()
+  with Solution { (part1, part2) =>
+    println("Part 1: ${part1.show}")
+    println("Part 2: ${part2.show}")
+  }
+}
+
+def main() = {
+  with on[IOError].panic
+  with readFile("input")
+  with decodeUTF8
+
+  with printer
+  with solver
+  with source[Rotation] {
+    do emit(Rotation(Right(), 50))
+    parse()
+  }
+  enterPassword()
+}
