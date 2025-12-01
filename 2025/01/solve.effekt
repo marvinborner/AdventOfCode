@@ -1,31 +1,23 @@
 import io/error
 import io/filesystem
+import scanner
 
 type Direction { Left(); Right() }
 record Rotation(direction: Direction, amount: Int)
 effect Password = read[Rotation]
 
-def collect(): Int / { Exception[WrongFormat], read[Char] } = {
-  def go(): Unit / { read[Char], emit[Char], stop } = {
-    val c = do read()
-    if (not(c.isDigit)) do stop()
-    do emit(c)
-    go()
-  }
-  string::collect { exhaustively { go() } }.toInt
-}
-
-def parse(): Unit / { read[Char], emit[Rotation] } = {
+def parse(): Unit / { Scan[Char], emit[Rotation] } = {
   with on[WrongFormat].panic
   with exhaustively
 
-  val ch = do read[Char]()
+  val ch = read()
   val direction = ch match {
     case 'L' => Left()
     case 'R' => Right()
     case _   => wrongFormat()
   }
-  val amount: Int = collect()
+  val amount = readInteger()
+  skipWhitespace()
   do emit[Rotation](Rotation(direction, amount))
 }
 
@@ -80,7 +72,7 @@ def main() = {
   with solver
   with source[Rotation] {
     do emit(Rotation(Right(), 50))
-    parse()
+    scanner[Char] { parse() }
   }
   enterPassword()
 }
