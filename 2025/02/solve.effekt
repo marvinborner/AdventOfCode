@@ -1,0 +1,87 @@
+import set
+import scanner
+import io/error
+import io/filesystem
+
+record Range(from: Int, to: Int)
+
+def parse(): Unit / { Scan[Char], emit[Range] } = {
+  with exhaustively
+
+  val from = readInteger()
+  skipIf('-')
+  val to = readInteger()
+  do emit(Range(from, to))
+  skipIf(',')
+}
+
+type Validation { Valid(); Invalid() }
+
+def digits(num: Int) = num.show.split("").size
+
+def validate(start: Int, num: Int): Validation = {
+  with on[WrongFormat].default { Invalid() }
+
+  val lnum = num.show.split("")
+  val len = num.digits
+  start.each(len / 2 + 1) { (i) {control} =>
+    if (len.mod(i) != 0) control.continue()
+    val nparts = len / i
+    val partLen = len / nparts
+
+    var parts: Set[List[String]] = emptyGeneric()
+    0.each(nparts) { part =>
+      val split = lnum.slice(part * partLen, (part + 1) * partLen)
+      parts = parts.insert(split)
+    }
+    if (parts.size == 1) wrongFormat()
+  }
+  Valid()
+}
+
+type Part { Easy(); Hard() }
+effect Solution(solution: Int, part: Part): Unit
+
+def countInvalid { start: Int => Int }: Int / { read[Range] } = {
+  with sum
+  with exhaustively
+  var res = 0
+  val Range(from, to) = do read[Range]()
+  println(from)
+  from.each(to + 1) { i =>
+    if (start(i).validate(i) is Valid()) res = res + i
+  }
+  do emit(res)
+}
+
+def printer() { solver: => Unit / Solution }: Unit = {
+  try solver()
+  with Solution { (solution, part) =>
+    resume(println(solution))
+  }
+}
+
+def solver() { parser: => Unit / emit[Range] }: Unit / Solution = {
+  manyTee[Range] { {tree} =>
+    with teeing[Range] { {s} =>
+      with source[Range] { s() }
+      do Solution(countInvalid { i => i.digits / 2 }, Easy())
+    }
+    with teeing[Range] { {s} =>
+      with source[Range] { s() }
+      do Solution(countInvalid { i => 1 }, Hard())
+    }
+    parser()
+  }
+}
+
+def main() = {
+  with on[IOError].panic
+  with readFile("input")
+  with decodeUTF8
+
+  with scanner[Char]
+  with printer
+  with solver
+  parse()
+}
