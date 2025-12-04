@@ -1,0 +1,54 @@
+import io/error
+import io/filesystem
+import scanner
+
+def for[A] { stream: () => Unit / emit[A] } { action: (A) { () => Unit / emit[A] } => Unit }: Unit = {
+  val lst: List[A] = collect { stream() } // TODO: somehow do not collect?
+  try {
+    lst.each // stream()
+  } with emit[A] { value =>
+    resume(action(value) { lst.each })
+  }
+}
+
+record Obstacle(x: Int, y: Int)
+effect Discover = emit[Obstacle]
+
+def discover(): Unit / { Scan[Char], Discover } = {
+  var x = 0
+  var y = 0
+  with exhaustively
+  read() match {
+    case '@'  => do emit(Obstacle(x, y)); x = x + 1
+    case '.'  => x = x + 1
+    case '\n' => x = 0; y = y + 1
+    case _    => ()
+  }
+}
+
+def countNeighbors(x1: Int, y1: Int) { d: => Unit / Discover }: Int = {
+  with sum
+  for { d() } { case Obstacle(x2, y2) =>
+    if (abs(x1 - x2) <= 1 && abs(y1 - y2) <= 1 && not(x1 == x2 && y1 == y2)) {
+      do emit(1)
+    }
+  }
+}
+
+def accessible { d: => Unit / Discover }: Int = {
+  with sum
+  for { d() } { (obstacle) {stream} =>
+    val Obstacle(x, y) = obstacle
+    if (countNeighbors(x, y) {stream} < 4)
+      do emit(1)
+  }
+}
+
+def main() = {
+  with on[IOError].panic
+  with readFile("input")
+  with decodeUTF8
+  
+  val res = accessible { scanner[Char] { discover() } }
+  println(res)
+}
